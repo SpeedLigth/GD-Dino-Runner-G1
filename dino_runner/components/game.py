@@ -1,6 +1,7 @@
 import pygame
 
 from dino_runner.components.dinosaur import Dinosaur
+from dino_runner.components.obstacles.birds import Birds
 
 from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
 
