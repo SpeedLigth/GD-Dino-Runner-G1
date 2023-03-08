@@ -1,3 +1,4 @@
+import random
 import pygame
 
 from dino_runner.components.dinosaur import Dinosaur
@@ -6,10 +7,11 @@ from dino_runner.components.obstacles.score import Score
 from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
 
 
-from dino_runner.utils.constants import BG, DINO_START, FONT_STYLE, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS
+from dino_runner.utils.constants import BG, DINO_START, FONT_STYLE, ICON, MESSAGES, POINTS, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS
 
 
 class Game:
+    
     def __init__(self):
         pygame.init()
         pygame.display.set_caption(TITLE)
@@ -21,22 +23,28 @@ class Game:
         self.game_speed = 20
         self.x_pos_bg = 0
         self.y_pos_bg = 380
+        self.message = MESSAGES
+
+        self.half_screen_width = SCREEN_WIDTH // 2
+        self.half_screen_heigth = SCREEN_HEIGHT // 2
 
         self.player = Dinosaur()
         self.obstacle_manage = ObstacleManager()
         self.score = Score()
+        self._score = None
         self.death_count = 0
+        
 
     def run(self):
         self.executing = True
         while self.executing:
             if not self.playing:
                 self.show_menu()
-
         pygame.quit()
 
     def start_game(self):
         # Game loop: events - update - draw
+        self.message = MESSAGES[random.randint(1, len(MESSAGES)-1)]
         self.playing = True
         self.obstacle_manage.reset()
         while self.playing:
@@ -80,21 +88,40 @@ class Game:
         self.death_count += 1
 
     def show_menu(self):
+        
         # Rellenar de color blanco la pantalla
         self.screen.fill((255, 255, 255))
+        #self.score.draw(self.screen)
         # Poner un mensaje de bienbenida centrado
-        half_screen_width = SCREEN_WIDTH // 2
-        half_screen_heigth = SCREEN_HEIGHT // 2
+        # self.half_screen_width = SCREEN_WIDTH // 2
+        # self.half_screen_heigth = SCREEN_HEIGHT // 2
+        
+        self.screen.blit(DINO_START, (self.half_screen_width - 40, self.half_screen_heigth -140))
+        font = pygame.font.Font(FONT_STYLE, 32)
+        
         if not self.death_count:
-            font = pygame.font.Font(FONT_STYLE, 32)
-            text = font.render("Welcome, press any key to star", True,(0, 0, 0))
-            text_rect = text.get_rect()
-            text_rect.center =(half_screen_width, half_screen_heigth)
-            self.screen.blit(text, text_rect)
+            text = font.render(MESSAGES[0], True,(0, 0, 0))
+            _score = font.render("Score: "+ str(0) +"  -  "+ str(0) , True,(0, 0, 255))
+            death = font.render("", True,(0, 0, 0))
         else:
-            pass
+            text = font.render(self.message , True,(0, 0, 0))
+            _score = font.render("Score: "+ str(self.score.get_max_point()) +"  -  "+ str(self.score.get_score()) , True,(0, 0, 255))
+            death = font.render("Death: "+ str(self.death_count) , True,(255, 0, 0))
+
+        text_rect = text.get_rect()
+        text_rect.center = (self.half_screen_width, self.half_screen_heigth)
+        self.screen.blit(text, text_rect)
+
+        text_rect_score = _score.get_rect()
+        text_rect_score.center = (self.half_screen_width-400, self.half_screen_heigth+230)
+        self.screen.blit(_score, text_rect_score)
+
+        text_rect_death = death.get_rect()
+        text_rect_death.center = (self.half_screen_width, self.half_screen_heigth+100)
+        self.screen.blit(death, text_rect_death)
+
         # Poner una imagen a modo icono en el juego
-        self.screen.blit(DINO_START, (half_screen_width - 40, half_screen_heigth -140))
+        
         # PLasmar los cambios
         pygame.display.update()
         # Manejar eventos
@@ -106,4 +133,7 @@ class Game:
                 self.playing = False
                 self.executing = False
             elif event.type == pygame.KEYDOWN:
+                POINTS.append(self.score.get_score())
+                self.score = Score()
                 self.start_game()
+        

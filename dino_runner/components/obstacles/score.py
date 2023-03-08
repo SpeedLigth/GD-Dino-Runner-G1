@@ -1,5 +1,5 @@
 import pygame
-from dino_runner.utils.constants import FONT_STYLE
+from dino_runner.utils.constants import FONT_STYLE, POINTS
 
 
 class Score:
@@ -17,3 +17,13 @@ class Score:
         text_rect = text.get_rect()
         text_rect.center = (950, 30)
         screen.blit(text, text_rect)
+    
+    def get_score(self):
+        return self.score
+    
+    def get_max_point(self):
+        max = POINTS[0]
+        for p in range(len(POINTS)):
+            if POINTS[p] > max:
+                max = POINTS[p]
+        return max

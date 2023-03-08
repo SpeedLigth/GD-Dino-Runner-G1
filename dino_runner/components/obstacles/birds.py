@@ -1,3 +1,4 @@
+import random
 from dino_runner.components.obstacles.obstacle import Obstacle
 from dino_runner.utils.constants import BIRD
 
@@ -7,7 +8,8 @@ class Birds(Obstacle):
         image = BIRD
         type = 0
         super().__init__(image, type)
-        self.rect.y = 270
+        y = [320, 270, 200]
+        self.rect.y = random.choice(y)
         self.step = 0
 
     def draw(self, screem):

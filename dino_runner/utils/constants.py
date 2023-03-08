@@ -75,3 +75,11 @@ HEART = pygame.image.load(os.path.join(IMG_DIR, 'Other/SmallHeart.png'))
 DEFAULT_TYPE = "default"
 
 FONT_STYLE = "freesansbold.ttf"
+
+MESSAGES = ["Welcome, press any key to start",
+            "Luck for the next...",
+            "King without a crow...",
+            "Beat your record...",
+            "We became extinct..."]
+
+POINTS = []
