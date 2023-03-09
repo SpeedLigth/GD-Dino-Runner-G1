@@ -5,9 +5,10 @@ from dino_runner.components.dinosaur import Dinosaur
 from dino_runner.components.obstacles.score import Score
 
 from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
+from dino_runner.components.poewer_ups.power_up_manager import PowerUpManager
 
 
-from dino_runner.utils.constants import BG, DINO_START, FONT_STYLE, ICON, MESSAGES, POINTS, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS
+from dino_runner.utils.constants import BG, DINO_START, FONT_STYLE, ICON, MESSAGES, POINTS, SCREEN_HEIGHT, SCREEN_WIDTH, SHIELD_TYPE, TITLE, FPS
 
 
 class Game:
@@ -33,6 +34,7 @@ class Game:
         self.score = Score()
         self._score = None
         self.death_count = 0
+        self.power_up_manager = PowerUpManager()
         
 
     def run(self):
@@ -47,6 +49,8 @@ class Game:
         self.message = MESSAGES[random.randint(1, len(MESSAGES)-1)]
         self.playing = True
         self.obstacle_manage.reset()
+        self.score.reset()
+        self.power_up_manager.reset()
         while self.playing:
             self.events()
             self.update()
@@ -62,6 +66,7 @@ class Game:
         self.player.update(user_input)
         self.obstacle_manage.update(self.game_speed, self.player, self.on_death)
         self.score.update(self)
+        self.power_up_manager.update(self.game_speed, self.score.score, self.player)
 
     def draw(self):
         self.clock.tick(FPS)
@@ -70,9 +75,10 @@ class Game:
         self.player.draw(self.screen)
         self.obstacle_manage.draw(self.screen)
         self.score.draw(self.screen)
+        self.power_up_manager.draw(self.screen)
+        self.player.check_power_up(self.screen)
         # pygame.display.update()
-        pygame.display.flip()
-        
+        pygame.display.flip() 
 
     def draw_background(self):
         image_width = BG.get_width()
@@ -84,8 +90,11 @@ class Game:
         self.x_pos_bg -= self.game_speed
 
     def on_death(self):
-        self.playing = False
-        self.death_count += 1
+        is_invincible = self.player.type == SHIELD_TYPE
+        if not is_invincible:
+            pygame.time.delay(500)
+            self.playing = False
+            self.death_count += 1
 
     def show_menu(self):
         
@@ -136,4 +145,3 @@ class Game:
                 POINTS.append(self.score.get_score())
                 self.score = Score()
                 self.start_game()
-        

@@ -27,3 +27,6 @@ class Score:
             if POINTS[p] > max:
                 max = POINTS[p]
         return max
+    
+    def reset(self):
+        self.score = 0
