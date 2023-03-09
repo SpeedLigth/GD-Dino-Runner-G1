@@ -1,14 +1,16 @@
+from logging import Manager
 import random
 import pygame
 
 from dino_runner.components.dinosaur import Dinosaur
+# from dino_runner.components.obstacles.cloud import Cloud
 from dino_runner.components.obstacles.score import Score
 
 from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
-from dino_runner.components.poewer_ups.power_up_manager import PowerUpManager
+from dino_runner.components.power_ups.power_up_manager import PowerUpManager
 
 
-from dino_runner.utils.constants import BG, DINO_START, FONT_STYLE, ICON, MESSAGES, POINTS, SCREEN_HEIGHT, SCREEN_WIDTH, SHIELD_TYPE, TITLE, FPS
+from dino_runner.utils.constants import BG, CLOUD, DINO_START, FONT_STYLE, GAME_OVER, HAMMER_TYPE, ICON, MESSAGES, POINTS, SCREEN_HEIGHT, SCREEN_WIDTH, SHIELD_TYPE, TITLE, FPS
 
 
 class Game:
@@ -24,6 +26,8 @@ class Game:
         self.game_speed = 20
         self.x_pos_bg = 0
         self.y_pos_bg = 380
+        self.x_pos_cloud = 0
+        self.y_pos_clouds= 90
         self.message = MESSAGES
 
         self.half_screen_width = SCREEN_WIDTH // 2
@@ -35,8 +39,6 @@ class Game:
         self._score = None
         self.death_count = 0
         self.power_up_manager = PowerUpManager()
-        
-
     def run(self):
         self.executing = True
         while self.executing:
@@ -67,11 +69,13 @@ class Game:
         self.obstacle_manage.update(self.game_speed, self.player, self.on_death)
         self.score.update(self)
         self.power_up_manager.update(self.game_speed, self.score.score, self.player)
+        # self.cloud.update()
 
     def draw(self):
         self.clock.tick(FPS)
         self.screen.fill((255, 255, 255))
         self.draw_background()
+        self.draw_cloud()
         self.player.draw(self.screen)
         self.obstacle_manage.draw(self.screen)
         self.score.draw(self.screen)
@@ -88,23 +92,28 @@ class Game:
             self.screen.blit(BG, (image_width + self.x_pos_bg, self.y_pos_bg))
             self.x_pos_bg = 0
         self.x_pos_bg -= self.game_speed
+    
+    
+    def draw_cloud(self):
+        self.screen.blit(CLOUD, (self.x_pos_cloud, self.y_pos_clouds))
+        self.screen.blit(CLOUD, (SCREEN_WIDTH-100 + self.x_pos_cloud, self.y_pos_clouds))
+        if self.x_pos_cloud <= -SCREEN_WIDTH:
+            self.screen.blit(CLOUD, (SCREEN_WIDTH + self.x_pos_cloud, self.y_pos_clouds))
+            self.x_pos_cloud = 0
+        self.x_pos_cloud -= self.game_speed
 
     def on_death(self):
         is_invincible = self.player.type == SHIELD_TYPE
-        if not is_invincible:
+        pick = self.player.type == HAMMER_TYPE
+        if not is_invincible and  not pick:
             pygame.time.delay(500)
             self.playing = False
             self.death_count += 1
 
     def show_menu(self):
-        
         # Rellenar de color blanco la pantalla
         self.screen.fill((255, 255, 255))
-        #self.score.draw(self.screen)
         # Poner un mensaje de bienbenida centrado
-        # self.half_screen_width = SCREEN_WIDTH // 2
-        # self.half_screen_heigth = SCREEN_HEIGHT // 2
-        
         self.screen.blit(DINO_START, (self.half_screen_width - 40, self.half_screen_heigth -140))
         font = pygame.font.Font(FONT_STYLE, 32)
         
@@ -113,6 +122,8 @@ class Game:
             _score = font.render("Score: "+ str(0) +"  -  "+ str(0) , True,(0, 0, 255))
             death = font.render("", True,(0, 0, 0))
         else:
+            self.screen.blit(GAME_OVER, (self.half_screen_width- 190, self.half_screen_heigth -190))
+            font = pygame.font.Font(FONT_STYLE, 32)
             text = font.render(self.message , True,(0, 0, 0))
             _score = font.render("Score: "+ str(self.score.get_max_point()) +"  -  "+ str(self.score.get_score()) , True,(0, 0, 255))
             death = font.render("Death: "+ str(self.death_count) , True,(255, 0, 0))
@@ -126,11 +137,11 @@ class Game:
         self.screen.blit(_score, text_rect_score)
 
         text_rect_death = death.get_rect()
-        text_rect_death.center = (self.half_screen_width, self.half_screen_heigth+100)
+        text_rect_death.center = (self.half_screen_width, self.half_screen_heigth+50)
         self.screen.blit(death, text_rect_death)
 
-        # Poner una imagen a modo icono en el juego
-        
+
+
         # PLasmar los cambios
         pygame.display.update()
         # Manejar eventos
@@ -145,3 +156,5 @@ class Game:
                 POINTS.append(self.score.get_score())
                 self.score = Score()
                 self.start_game()
+
+    

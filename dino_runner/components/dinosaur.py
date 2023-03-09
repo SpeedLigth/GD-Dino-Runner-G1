@@ -1,15 +1,15 @@
 from pygame.sprite import Sprite
 import pygame
 
-from dino_runner.utils.constants import DEFAULT_TYPE, DUCKING_SHIELD, JUMPING, JUMPING_SHIELD, RUNNING, DUCKING, RUNNING_SHIELD, SHIELD_TYPE
+from dino_runner.utils.constants import DEFAULT_TYPE, DUCKING_HAMMER, DUCKING_SHIELD, FONT_STYLE, HAMMER_TYPE, JUMPING, JUMPING_HAMMER, JUMPING_SHIELD, RUNNING, DUCKING, RUNNING_HAMMER, RUNNING_SHIELD, SHIELD_TYPE
 
 DINO_RUNNING = "running"
 DINO_JUMPING = "jumping"
 DINO_DUCKING = "ducking"
 
-DUCK_IMG = {DEFAULT_TYPE : DUCKING, SHIELD_TYPE: DUCKING_SHIELD}
-JUMP_IMG = {DEFAULT_TYPE : JUMPING, SHIELD_TYPE: JUMPING_SHIELD}
-RUN_IMG = {DEFAULT_TYPE : RUNNING, SHIELD_TYPE: RUNNING_SHIELD}
+DUCK_IMG = {DEFAULT_TYPE : DUCKING, SHIELD_TYPE: DUCKING_SHIELD, HAMMER_TYPE: DUCKING_HAMMER}
+JUMP_IMG = {DEFAULT_TYPE : JUMPING, SHIELD_TYPE: JUMPING_SHIELD, HAMMER_TYPE: JUMPING_HAMMER}
+RUN_IMG = {DEFAULT_TYPE : RUNNING, SHIELD_TYPE: RUNNING_SHIELD, HAMMER_TYPE: RUNNING_HAMMER}
 
 class Dinosaur(Sprite):
     POSITION_X = 80
@@ -26,6 +26,7 @@ class Dinosaur(Sprite):
         self.actions = DINO_RUNNING
         self.jump_velocity = self.JUMP_VELOCITY
         self.step = 0
+        self.duration =0
 
 
     def update(self, user_input):
@@ -86,10 +87,30 @@ class Dinosaur(Sprite):
         self.power_up_time_up = power_up.start_time + (power_up.duration * 1000)
     
     def check_power_up(self, screen):
+        font = pygame.font.Font(FONT_STYLE, 18)
         if self.type == SHIELD_TYPE:
             time_to_show = round((self.power_up_time_up - pygame.time.get_ticks()) / 1000, 2)
             if time_to_show >= 0:
-                print(f"{self.type.capitalize()} enabled for {time_to_show} seconds,", screen,) #(font_size=16, pos_y_center=50))
+                duration = f"{self.type.capitalize()} enabled for {time_to_show} seconds,"
+                print(duration, screen,) #(font_size=16, pos_y_center=50))
+                text = font.render(f"{duration}", True, (0, 0, 0))
+                text_rect = text.get_rect()
+                text_rect.center = (200, 50)
+                screen.blit(text, text_rect)
             else:
                 self.type = DEFAULT_TYPE
                 self.power_up_time_up = 0
+        elif self.type == HAMMER_TYPE:
+            time_to_show = round((self.power_up_time_up - pygame.time.get_ticks()) / 1000, 2)
+            if time_to_show >= 0:
+                duration = f"{self.type.capitalize()} enabled for {time_to_show} seconds,"
+                print(duration, screen,) #(font_size=16, pos_y_center=50))
+                text = font.render(f"{duration}", True, (0, 0, 0))
+                text_rect = text.get_rect()
+                text_rect.center = (200, 50)
+                screen.blit(text, text_rect)
+                
+            else:
+                self.type = DEFAULT_TYPE
+                self.power_up_time_up = 0       
+        

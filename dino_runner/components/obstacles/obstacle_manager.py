@@ -11,9 +11,8 @@ class ObstacleManager:
         if random.randint(0, 7) >= 5:
             if not self.obstacles:
                 self.obstacles.append(Cactus())
-        elif not self.obstacles:
-            self.obstacles.append(Birds())
-
+            elif not self.obstacles:
+                self.obstacles.append(Birds())
 
         for obstacle in self.obstacles:
             obstacle.update(game_speed, self.obstacles)
